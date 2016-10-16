@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+
+    <!--
+    Thu Oct 13 00:03:07 EEST 2016 WARN: Establishing SSL connection without server's identity verification is
+    not recommended. According to MySQL 5.5.45+, 5.6.26+ and 5.7.6+ requirements SSL connection must be established
+    by default if explicit option isn't set. For compliance with existing applications not using SSL the
+    verifyServerCertificate property is set to 'false'. You need either to explicitly disable SSL by setting
+    useSSL=false, or set useSSL=true and provide truststore for server certificate verification.
+    -->
+
+
+
+    <display-name>AutoPark</display-name>
+    <welcome-file-list>
+        <welcome-file>login.html</welcome-file>
+    </welcome-file-list>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- config ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <context-param>
+        <param-name>dbUser</param-name>
+        <param-value>quest</param-value>
+    </context-param>
+    <context-param>
+        <param-name>dbPassword</param-name>
+        <param-value>some_very_simple_password_for_database</param-value>
+    </context-param>
+    <context-param>
+        <param-name>dbURL</param-name>
+        <param-value>jdbc:mysql://localhost:3306/autopark?characterEncoding=UTF-8</param-value>
+    </context-param>
+    <context-param>
+        <param-name>log4j-config</param-name>
+        <param-value>WEB-INF/log4j.xml</param-value>
+    </context-param>
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- servlet + servlet mapping ~~~~~~~~ -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <servlet>
+        <servlet-name>Index</servlet-name>
+        <servlet-class>com.vitaliyhtc.autopark.servlets.Index</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Index</servlet-name>
+        <url-pattern>/Index</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AppHome</servlet-name>
+        <servlet-class>com.vitaliyhtc.autopark.servlets.AppHome</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AppHome</servlet-name>
+        <url-pattern>/home</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DrivingLicenceCategories</servlet-name>
+        <servlet-class>com.vitaliyhtc.autopark.servlets.DrivingLicenceCategories</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DrivingLicenceCategories</servlet-name>
+        <url-pattern>/drivinglicencecategories</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AutoManufacturers</servlet-name>
+        <servlet-class>com.vitaliyhtc.autopark.servlets.AutoManufacturers</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AutoManufacturers</servlet-name>
+        <url-pattern>/automanufacturers</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>AutoMobiles</servlet-name>
+        <servlet-class>com.vitaliyhtc.autopark.servlets.AutoMobiles</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AutoMobiles</servlet-name>
+        <url-pattern>/automobiles</url-pattern>
+    </servlet-mapping>
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- errors handling ~~~~~~~~~~~~~~~~~~ -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <error-page>
+        <error-code>404</error-code>
+        <location>/AppErrorHandler</location>
+    </error-page>
+    <error-page>
+        <exception-type>java.lang.Throwable</exception-type>
+        <location>/AppErrorHandler</location>
+    </error-page>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- filtering ~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <filter>
+        <filter-name>AuthenticationFilter</filter-name>
+        <filter-class>com.vitaliyhtc.autopark.util.AuthenticationFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthenticationFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+
+</web-app>

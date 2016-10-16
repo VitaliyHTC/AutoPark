@@ -1,0 +1,81 @@
+/* my base default */
+body {font-family: Verdana, Arial, sans-serif; font-size: 11pt; background: #E0E0E0;}
+
+
+
+body {background-color: #EDAF76;
+    background-image: url('../images/Dwoodenbg.jpg');
+    background-position: top left;
+    background-repeat: repeat;
+    background-attachment: fixed;
+
+    margin: 0;
+    padding: 0;
+}
+
+
+/* custom gradient */
+div.LoginFormHeader, div.RegisterFormHeader, div.UserAccountOptionsOuter, div.main-header {
+    background: -webkit-linear-gradient(top,rgba(49,49,49,0.63),rgba(11,11,11,0.91));
+    background-image: -moz-linear-gradient(top,rgba(49,49,49,0.63),rgba(11,11,11,0.91));
+    background-image: -o-linear-gradient(top,rgba(49,49,49,0.63),rgba(11,11,11,0.91));
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#a0313131, endColorstr=#e80b0b0b);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#a0313131, endColorstr=#e80b0b0b)";
+}
+
+/* виджеты */
+h2.box {font-size: 1.5em; line-height: 1.1em; margin-bottom: 5px;} /* заголовок виджета */
+div.widget_header, div.LoginFormHeader, div.RegisterFormHeader, div.main-header {
+    font-size: 1.5em;
+    font-family:Verdana, Geneva, sans-serif;;color:white;text-shadow: 0px -1px 0px #222;
+    font-style:italic;font-weight:normal;letter-spacing:-1px;line-height:100%;
+    border: #333 1px solid; border-bottom: rgba(243, 129, 7, 0.91) 1px solid;
+    margin:0;padding:7px;border-radius: 7px 7px 0 0;
+} /* заголовок виджета */
+div.widget-content, div.LoginFormContent, div.RegisterFormContent, div.main-content {
+    font-size: 0.9em; padding: 9px; border-radius: 0 0 7px 7px; background: white;
+}
+div.LoginForm, div.RegisterForm {
+    min-width:300px;max-width:640px;width:100%; margin: 16pt auto;
+}
+
+
+div.LoginForm form input, div.RegisterForm form input {
+    -webkit-box-sizing: border-box; /* For legacy WebKit based browsers */
+    -moz-box-sizing: border-box; /* For legacy (Firefox <29) Gecko based browsers */
+    box-sizing: border-box;
+    display: block;
+    margin: 8px 0;
+    padding:5px;
+    min-width:250px;max-width:600px;width:100%;
+    font-size: 1em;
+    border-radius: 3px;
+    outline: none;
+    border: 1px solid #ccc;
+}
+
+div.UserAccountOptionsOuter {
+    min-width: 300px; max-width: 1240px; width: 100%; margin: 0 auto; padding: 8px;
+    -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    overflow: auto;
+    font-size: 0.9em;
+    color: white;
+    border-bottom: rgba(243, 129, 7, 0.91) 1px solid;
+    border-left: rgba(243, 129, 7, 0.91) 1px solid;
+    border-right: rgba(243, 129, 7, 0.91) 1px solid;
+    border-radius: 0 0 7px 7px;
+}
+div.UserAccountOptionsInner {}
+div.UserInfo {  float:left;  }
+div.UserLogoutForm { float:right; }
+
+
+div.all-wrap {
+    min-width:300px;max-width:1240px;width:100%; margin: 16pt auto;
+}
+
+span.Successful { color:green; }
+span.Failed { color:red; }
+table {width:100%;}
+table, td, tr, th {  text-align: left;}
