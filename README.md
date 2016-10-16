@@ -1,0 +1,2 @@
+# AutoPark
+Web application for storing information about drivers and trucks/cars. For drivers we can set their personal data, contact info, list of driver license categories. For trucks we also set needed categories. If driver has only category B (for passenger cars), he can't drive truck with category CE. We can set multiple drivers for one truck, and set several trucks for one driver. All data CRUD operations are validated on server side, and if problem occurs - user gets information what's wrong and what to do. Used technologies: MySQL + JDBC + Servlet + JSP + Maven.
