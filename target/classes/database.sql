@@ -40,6 +40,8 @@ CREATE TABLE auto (
   license_plate_number VARCHAR(32) NOT NULL,
   description VARCHAR(255) NOT NULL,
   PRIMARY KEY (id),
+  UNIQUE INDEX `vin_number_UNIQUE` (`vin_number` ASC),
+  UNIQUE INDEX `license_plate_number_UNIQUE` (`license_plate_number` ASC),
   foreign key (manufacturer) references auto_manufacturer(id),
   foreign key (driving_licence_category) references driving_licence_categories(id)
 );

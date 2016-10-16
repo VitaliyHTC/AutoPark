@@ -74,7 +74,7 @@
                     <form action="automanufacturers" method="post">
                         <strong>ID</strong>:<br><input type="hidden" name="manufacturer_id" value ="${itemAMtoEdit.getId()}">
                             <input type="text" value="${itemAMtoEdit.getId()}" disabled><br>
-                        <strong>Ім'я</strong>:<br><input type="text" name="manufacturer_name"
+                        <strong>Ім'я</strong>:<br><input type="text" name="manufacturer_name" maxlength="64"
                                                          value="${itemAMtoEdit.getManufacturer_name()}"><br>
                         <strong>Опис</strong>:<br>
                             <textarea name="manufacturer_description" maxlength="255" rows="7"
@@ -89,7 +89,7 @@
                     <form action="automanufacturers" method="post">
                         <strong>ID</strong>:<br><input type="hidden" name="manufacturer_id" value ="-1">
                             <input type="text" value="-1" disabled><br>
-                        <strong>Ім'я</strong>:<br><input type="text" name="manufacturer_name" value=""><br>
+                        <strong>Ім'я</strong>:<br><input type="text" name="manufacturer_name" value="" maxlength="64"><br>
                         <strong>Опис</strong>:<br>
                             <textarea name="manufacturer_description" maxlength="255" rows="7" cols="51"></textarea><br>
                         <input type="submit" value="Додаємо.">

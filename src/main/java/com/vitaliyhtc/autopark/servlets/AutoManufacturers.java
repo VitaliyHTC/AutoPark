@@ -24,12 +24,12 @@ public class AutoManufacturers extends HttpServlet {
 
         Connection con = (Connection) getServletContext().getAttribute("DBConnection");
 
-
         /*
          * Return selected item for editing;
          */
-        AutoManufacturer itemAMtoEdit=null; //if in adding/editing item occurs some error <<< used in next section too
+        AutoManufacturer itemAMtoEdit = null; //if in adding/editing item occurs some error <<< used in next section
         String itemIdToEdit = request.getParameter("itemIDtoEdit");
+        String errorItemIdToEdit = null;
         if(itemIdToEdit!=null){
             try {
                 int itemIDtoEditInt = Integer.parseInt(itemIdToEdit);
@@ -61,6 +61,7 @@ public class AutoManufacturers extends HttpServlet {
                 }
             }catch(NumberFormatException ex){
                 logger.info("Oooops! NumberFormatException in GET request parameter itemIDtoEdit: " + itemIdToEdit);
+                errorItemIdToEdit="Getting item for edit failed. NumberFormatException.";
             }
         }
         // Return selected item for editing;
@@ -94,9 +95,6 @@ public class AutoManufacturers extends HttpServlet {
                 try{
                     int manufacturer_id = Integer.parseInt(request.getParameter("manufacturer_id"));
                     String manufacturerNameUC = manufacturer_name.toUpperCase();
-                    int one = 1;
-                    int two = 2;
-                    int three = 3;
                     if(manufacturer_id == -1){
                         Boolean cancelAdding = false; // if duplication found - cancel adding.
                         ps3 = con.prepareStatement("select id, manufacturer_name from auto_manufacturer where manufacturer_name=? limit 1");
@@ -119,17 +117,17 @@ public class AutoManufacturers extends HttpServlet {
                             ps2 = con.prepareStatement("INSERT INTO auto_manufacturer(id, manufacturer_name, description) VALUES(null, ?, ?)");
                             // id, manufacturer_name, description
                             //INSERT INTO auto_manufacturer(id, manufacturer_name, description) VALUES(null, 'SCANIA', 'Best trucks & good sounding engines!');
-                            ps2.setString(one, manufacturerNameUC);
-                            ps2.setString(two, manufacturer_description);
+                            ps2.setString(1, manufacturerNameUC);
+                            ps2.setString(2, manufacturer_description);
                             ps2.execute();
                             AddUpdSuccessful = "Successful!";
                         }
                     }else{
                         ps2 = con.prepareStatement("UPDATE auto_manufacturer SET manufacturer_name=?, description=? WHERE id=?");
                         //UPDATE auto_manufacturer SET manufacturer_name='?', description='?' WHERE id=?;
-                        ps2.setString(one, manufacturerNameUC);
-                        ps2.setString(two, manufacturer_description);
-                        ps2.setInt(three, manufacturer_id);
+                        ps2.setString(1, manufacturerNameUC);
+                        ps2.setString(2, manufacturer_description);
+                        ps2.setInt(3, manufacturer_id);
                         ps2.execute();
                         AddUpdSuccessful = "Successful!";
                     }
@@ -139,15 +137,9 @@ public class AutoManufacturers extends HttpServlet {
                     throw new ServletException("DB Connection problem.");
                 }finally{
                     try {
-                        if(rs3!=null){
-                            rs3.close();
-                        }
-                        if(ps3!=null){
-                            ps3.close();;
-                        }
-                        if(ps2!=null){
-                            ps2.close();
-                        }
+                        if(rs3!=null){rs3.close();}
+                        if(ps3!=null){ps3.close();}
+                        if(ps2!=null){ps2.close();}
                     } catch (SQLException e) {
                         logger.error("SQLException in closing PreparedStatement or ResultSet");
                     }
@@ -195,19 +187,28 @@ public class AutoManufacturers extends HttpServlet {
          * Set attributes and follow to our jsp page (:
          */
 
-        request.getSession().setAttribute("listAM", listAM);
+        request.getSession().removeAttribute("listAM");
+        request.getSession().removeAttribute("listDLC");
+        request.getSession().removeAttribute("listTrucks");
         request.getSession().removeAttribute("itemAMtoEdit");
+        request.getSession().removeAttribute("itemTruckToEdit");
+        request.getSession().removeAttribute("AddUpdSuccessful");
+        request.getSession().removeAttribute("AddUpdFailed");
+
+        if(errorItemIdToEdit!=null){
+            errorMsgBuffer.append(errorItemIdToEdit);
+        }
+
         if(itemAMtoEdit!=null){
             request.getSession().setAttribute("itemAMtoEdit", itemAMtoEdit);
         }
-        request.getSession().removeAttribute("AddUpdSuccessful");
         if(AddUpdSuccessful!=null){
             request.getSession().setAttribute("AddUpdSuccessful", AddUpdSuccessful);
         }
-        request.getSession().removeAttribute("AddUpdFailed");
         if(errorMsgBuffer.length() > 3){
             request.getSession().setAttribute("AddUpdFailed", errorMsgBuffer.toString());
         }
+        request.getSession().setAttribute("listAM", listAM);
         request.getRequestDispatcher("automanufacturers.jsp").forward(request, response);
     }
 
