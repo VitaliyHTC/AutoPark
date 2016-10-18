@@ -79,6 +79,7 @@
         <servlet-name>AutoManufacturers</servlet-name>
         <url-pattern>/automanufacturers</url-pattern>
     </servlet-mapping>
+
     <servlet>
         <servlet-name>AutoMobiles</servlet-name>
         <servlet-class>com.vitaliyhtc.autopark.servlets.AutoMobiles</servlet-class>
@@ -86,6 +87,15 @@
     <servlet-mapping>
         <servlet-name>AutoMobiles</servlet-name>
         <url-pattern>/automobiles</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>Drivers</servlet-name>
+        <servlet-class>com.vitaliyhtc.autopark.servlets.Drivers</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Drivers</servlet-name>
+        <url-pattern>/drivers</url-pattern>
     </servlet-mapping>
     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 

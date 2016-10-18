@@ -3,6 +3,7 @@ body {font-family: Verdana, Arial, sans-serif; font-size: 11pt; background: #E0E
 
 
 
+
 body {background-color: #EDAF76;
     background-image: url('../images/Dwoodenbg.jpg');
     background-position: top left;
@@ -78,4 +79,5 @@ div.all-wrap {
 span.Successful { color:green; }
 span.Failed { color:red; }
 table {width:100%;}
-table, td, tr, th {  text-align: left;}
+th {color:#888888;}
+table, td, tr, th {text-align: left;}

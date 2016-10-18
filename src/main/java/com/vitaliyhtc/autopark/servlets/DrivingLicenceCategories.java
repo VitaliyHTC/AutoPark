@@ -53,6 +53,17 @@ public class DrivingLicenceCategories extends HttpServlet {
             }
         }
 
+
+        request.getSession().removeAttribute("listAM");
+        request.getSession().removeAttribute("listDLC");
+        request.getSession().removeAttribute("listTrucks");
+        request.getSession().removeAttribute("driversMap");
+        request.getSession().removeAttribute("itemAMtoEdit");
+        request.getSession().removeAttribute("itemTruckToEdit");
+        request.getSession().removeAttribute("AddUpdSuccessful");
+        request.getSession().removeAttribute("AddUpdFailed");
+
+
         request.getSession().setAttribute("listDLC", listDLC);
         request.getRequestDispatcher("drivinglicencecategories.jsp").forward(request, response);
     }

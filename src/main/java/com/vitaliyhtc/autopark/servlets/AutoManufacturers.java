@@ -190,6 +190,7 @@ public class AutoManufacturers extends HttpServlet {
         request.getSession().removeAttribute("listAM");
         request.getSession().removeAttribute("listDLC");
         request.getSession().removeAttribute("listTrucks");
+        request.getSession().removeAttribute("driversMap");
         request.getSession().removeAttribute("itemAMtoEdit");
         request.getSession().removeAttribute("itemTruckToEdit");
         request.getSession().removeAttribute("AddUpdSuccessful");

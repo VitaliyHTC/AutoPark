@@ -37,9 +37,7 @@
                 <li><a href="/drivers">Водії</a></li>
                 <li><a href="/automobiles">Автомобілі</a></li>
                 <li><a href="/automanufacturers">Список виробників авто</a></li>
-                <li><a href="/drivinglicencecategories">Список категорій транспортних засобів</a></li>
-                <li><a href="/driverlicence">Список категорій водія</a></li>
-                <li><a href="/driversautos">Списки закріплення водіїв за автомобілями</a></li>
+                <li><a href="/drivinglicencecategories"><i>Довідка:</i> Список категорій транспортних засобів</a></li>
             </ul>
 
             <br><br><br>
