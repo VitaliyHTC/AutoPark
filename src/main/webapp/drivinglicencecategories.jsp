@@ -32,9 +32,12 @@
             AutoPark : Список категорій транспортних засобів
         </div>
         <div class="main-content">
-            <a href="home">На початкову сторінку.</a><br><br><br>
-
-            <h3>Список категорій транспортних засобів</h3>
+            <a href="home">На початкову сторінку.</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="/drivers">Водії</a>&nbsp;&nbsp;&nbsp;
+            <a href="/automobiles">Автомобілі</a>&nbsp;&nbsp;&nbsp;
+            <a href="/automanufacturers">Список виробників авто</a>&nbsp;&nbsp;&nbsp;
+            <a href="/drivinglicencecategories"><i>Довідка:</i> Список категорій транспортних засобів</a>
+            <br><br><br>
             <% ArrayList<DriverLicenceCategory> listDLC =
                     (ArrayList<DriverLicenceCategory>) session.getAttribute("listDLC");
             %>

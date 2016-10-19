@@ -32,10 +32,19 @@
             AutoPark : Список водіїв
         </div>
         <div class="main-content">
-            <a href="home">На початкову сторінку.</a><br><br><br>
-
-            <h3>Список водіїв</h3>
-
+            <a href="home">На початкову сторінку.</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="/drivers">Водії</a>&nbsp;&nbsp;&nbsp;
+            <a href="/automobiles">Автомобілі</a>&nbsp;&nbsp;&nbsp;
+            <a href="/automanufacturers">Список виробників авто</a>&nbsp;&nbsp;&nbsp;
+            <a href="/drivinglicencecategories"><i>Довідка:</i> Список категорій транспортних засобів</a>
+            <br>
+            <c:if test="${!empty DeleteSuccessful}">
+                <br><span class="Successful">${DeleteSuccessful}</span><br>
+            </c:if>
+            <c:if test="${!empty DeleteFailed}">
+                <br><span class="Failed">${DeleteFailed}</span><br>
+            </c:if>
+            <br>
             <% HashMap<Integer, Driver> driversMap = (HashMap<Integer, Driver>) session.getAttribute("driversMap"); %>
             <c:if test="${!empty driversMap}">
                 <table class="w100">

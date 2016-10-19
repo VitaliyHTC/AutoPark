@@ -115,7 +115,70 @@ public class Drivers extends HttpServlet {
         //Return selected item for editing;
 
         /*
-         * Return selected driver trucks list listPossibleTrucks
+         * Deleting selected driver item itemIDtoDelete
+         */
+        String itemIDtoDelete = request.getParameter("itemIDtoDelete");
+        String DeleteSuccessful = null;
+        String DeleteFailed = null;
+        StringBuffer deleteFailedBuffer = new StringBuffer(256);
+        if(itemIDtoDelete!=null){
+            try {
+                int itemIDtoDeleteInt = Integer.parseInt(itemIDtoDelete);
+                PreparedStatement ps40 = null; // delete driver if no selected trucks
+                PreparedStatement ps41 = null; // get list of trucks selected for this driver
+                PreparedStatement ps42 = null; // delete driver DLCs
+                ResultSet rs41 = null;
+                try{
+                    ps41 = con.prepareStatement(
+                        "select auto.id from drivers, driver_auto, auto where drivers.id=driver_auto.driver_id and " +
+                                "driver_auto.auto_id=auto.id and drivers.id=?");
+                    ps41.setInt(1, itemIDtoDeleteInt);
+                    rs41 = ps41.executeQuery();
+                    int count = 0;
+                    if(rs41!=null){
+                        deleteFailedBuffer.append("Deleting failed! Automobiles with next IDs are used by driver: ");
+                        while(rs41.next()){
+                            if(count>0){deleteFailedBuffer.append(", ");}
+                            deleteFailedBuffer.append(rs41.getInt("auto.id"));
+                            count++;
+                        }
+                        deleteFailedBuffer.append("; Cancel selection of automobiles first, and then remove driver.");
+                    }
+                    if(deleteFailedBuffer.length()>3 && count>0){
+                        DeleteFailed = deleteFailedBuffer.toString();
+                    }
+                    if(DeleteFailed==null){
+                        ps42 = con.prepareStatement("DELETE from driver_licence where driver_id=?");
+                        ps42.setInt(1, itemIDtoDeleteInt);
+                        ps42.execute();
+                        ps40 = con.prepareStatement("DELETE from drivers where id=?");
+                        ps40.setInt(1, itemIDtoDeleteInt);
+                        ps40.execute();
+                        DeleteSuccessful = "Deleting successful!";
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    logger.error("Database connection problem");
+                    throw new ServletException("DB Connection problem.");
+                }finally{
+                    try {
+                        if(rs41!=null){rs41.close();}
+                        if(ps41!=null){ps41.close();}
+                        if(ps40!=null){ps40.close();}
+                        if(ps42!=null){ps42.close();}
+                    } catch (SQLException e) {
+                        logger.error("SQLException in closing PreparedStatement or ResultSet");
+                    }
+                }
+            }catch(NumberFormatException ex){
+                logger.info("Oooops! NumberFormatException in GET request parameter itemIDtoDelete: " + itemIDtoDelete);
+                errorItemIdToEdit="Getting item for edit failed. NumberFormatException.";
+            }
+        }
+        // Deleting driver item
+
+        /*
+         * Return selected driver with items for truck list editing
          */
         Driver itemDriverForTrucksListEditing = null;
         ArrayList<Driver_Truck> listPossibleTrucks = null;
@@ -167,9 +230,9 @@ public class Drivers extends HttpServlet {
 
                     selectedTrucksSet = new HashSet<Integer>();
                     ps3 = con.prepareStatement(
-                            "select auto.id from drivers, driver_auto, auto, auto_manufacturer " +
+                            "select auto.id from drivers, driver_auto, auto " +
                                     "where drivers.id=driver_auto.driver_id and driver_auto.auto_id=auto.id " +
-                                    "and auto.manufacturer=auto_manufacturer.id and drivers.id=?");
+                                    "and drivers.id=?");
                     ps3.setInt(1, itemIDtoEditTrucksInt);
                     rs3 = ps3.executeQuery();
                     if(rs3!=null){
@@ -195,7 +258,7 @@ public class Drivers extends HttpServlet {
                     }
                 }
             }catch(NumberFormatException ex){
-                logger.info("Oooops! NumberFormatException in GET request parameter itemIDtoEdit: " + itemIdToEdit);
+                logger.info("Oooops! NumberFormatException in GET request parameter itemIDtoEditTrucks: " + itemIDtoEditTrucks);
                 errorItemIdToEdit="Getting item for edit failed. NumberFormatException.";
             }
         }
@@ -390,7 +453,42 @@ public class Drivers extends HttpServlet {
                             AddUpdSuccessful = "Successful";
                         }
                     }else{ //update existing driver
-                        Boolean cancelUpdate = false; // if driver not has categories for selected trucks - return for editing
+                        Boolean cancelUpdate = false; // if driver not has categories for selected trucks
+                            // or duplicate found - return for editing
+                        ps21 = con.prepareStatement("select id, username from drivers where username=? and id!=?");
+                        ps21.setString(1, username);
+                        ps21.setInt(2, driver_id);
+                        rs21 = ps21.executeQuery();
+                        if(rs21!=null && rs21.next()){
+                            if(username.equals(rs21.getString("username"))){
+                                errorMsgBuffer.append("Driver with username: ");
+                                errorMsgBuffer.append(username);
+                                errorMsgBuffer.append(" already exists with ID: ");
+                                errorMsgBuffer.append(rs21.getInt("id"));
+                                errorMsgBuffer.append(". See in table by ID.<br>");
+                                errorMsgBuffer.append("You can't create driver with the same username twice. Please correct data.<br>");
+                                cancelUpdate=true;
+                            }
+                        }
+                        ps22 = con.prepareStatement("select id, firstname, lastname from drivers where firstname=? and lastname=? and id!=?");
+                        ps22.setString(1, firstname);
+                        ps22.setString(2, lastname);
+                        ps22.setInt(3, driver_id);
+                        rs22 = ps22.executeQuery();
+                        if(rs22!=null && rs22.next()){
+                            if(firstname.equals(rs22.getString("firstname"))&&lastname.equals(rs22.getString("lastname"))){
+                                errorMsgBuffer.append("Driver with name: ");
+                                errorMsgBuffer.append(firstname);
+                                errorMsgBuffer.append(" ");
+                                errorMsgBuffer.append(lastname);
+                                errorMsgBuffer.append(" already exists with ID: ");
+                                errorMsgBuffer.append(rs22.getInt("id"));
+                                errorMsgBuffer.append(". See in table by ID.<br>");
+                                errorMsgBuffer.append("You can't create driver with the same firstname and lastname twice. Please correct data.<br>");
+                                cancelUpdate=true;
+                            }
+                        }
+
                         ps25 = con.prepareStatement(
                             "select distinct auto.driving_licence_category from drivers, driver_auto, auto " +
                                 "where drivers.id=driver_auto.driver_id and auto.id=driver_auto.auto_id and drivers.id=?");
@@ -505,13 +603,13 @@ public class Drivers extends HttpServlet {
             int driverTrucksIDint = Integer.parseInt(request.getParameter("driverTrucks_id"));
 
             try{
-                //select auto.id from drivers, driver_licence, auto, auto_manufacturer where drivers.id=driver_licence.driver_id
-                // and auto.driving_licence_category = driver_licence.licence_id and auto.manufacturer=auto_manufacturer.id and drivers.id=?
+                //select auto.id from drivers, driver_licence where drivers.id=driver_licence.driver_id
+                // and auto.driving_licence_category = driver_licence.licence_id and drivers.id=?
                 possibleTrucksSet = new HashSet<Integer>();
                 ps31 = con.prepareStatement(
-                    "select auto.id from drivers, driver_licence, auto, auto_manufacturer " +
+                    "select auto.id from drivers, driver_licence, auto " +
                         "where drivers.id=driver_licence.driver_id and auto.driving_licence_category = driver_licence.licence_id " +
-                            "and auto.manufacturer=auto_manufacturer.id and drivers.id=?");
+                            "and drivers.id=?");
                 ps31.setInt(1, driverTrucksIDint);
                 rs31 = ps31.executeQuery();
                 if(rs31!=null){
@@ -673,6 +771,8 @@ public class Drivers extends HttpServlet {
         request.getSession().removeAttribute("itemTruckToEdit");
         request.getSession().removeAttribute("AddUpdSuccessful");
         request.getSession().removeAttribute("AddUpdFailed");
+        request.getSession().removeAttribute("DeleteSuccessful");
+        request.getSession().removeAttribute("DeleteFailed");
 
         request.getSession().removeAttribute("itemDriverToEdit");
         request.getSession().removeAttribute("dlcChecked");
@@ -699,6 +799,12 @@ public class Drivers extends HttpServlet {
         }
         if(errorMsgBuffer.length() > 3){
             request.getSession().setAttribute("AddUpdFailed", errorMsgBuffer.toString());
+        }
+        if(DeleteSuccessful!=null){
+            request.getSession().setAttribute("DeleteSuccessful", DeleteSuccessful);
+        }
+        if(DeleteFailed!=null){
+            request.getSession().setAttribute("DeleteFailed", DeleteFailed);
         }
         request.getSession().setAttribute("listDLC", listDLC);
         request.getSession().setAttribute("driversMap", driversMap);

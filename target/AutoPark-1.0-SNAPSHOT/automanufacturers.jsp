@@ -32,26 +32,39 @@
             AutoPark : Список виробників транспортних засобів
         </div>
         <div class="main-content">
-            <a href="home">На початкову сторінку.</a><br>
-
-            <h3>Список виробників транспортних засобів</h3>
+            <a href="home">На початкову сторінку.</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="/drivers">Водії</a>&nbsp;&nbsp;&nbsp;
+            <a href="/automobiles">Автомобілі</a>&nbsp;&nbsp;&nbsp;
+            <a href="/automanufacturers">Список виробників авто</a>&nbsp;&nbsp;&nbsp;
+            <a href="/drivinglicencecategories"><i>Довідка:</i> Список категорій транспортних засобів</a>
+            <br>
+            <c:if test="${!empty DeleteSuccessful}">
+                <br><span class="Successful">${DeleteSuccessful}</span><br>
+            </c:if>
+            <c:if test="${!empty DeleteFailed}">
+                <br><span class="Failed">${DeleteFailed}</span><br>
+            </c:if>
+            <br>
             <% ArrayList<AutoManufacturer> listAM =
                     (ArrayList<AutoManufacturer>) session.getAttribute("listAM");
             %>
             <c:if test="${!empty listAM}">
-                <table class="w100">
+                <table class="w100 Zebra">
                     <tr>
                         <th width="40">ID</th>
                         <th width="120">Ім'я</th>
-                        <th width="100%">Опис</th>
-                        <th width="60">Редагуєм?</th>
+                        <th width="800">Опис</th>
+                        <th width="120">Редагуєм?</th>
                     </tr>
                     <c:forEach items="${listAM}" var="listItem">
                         <tr>
                             <td>${listItem.getId()}</td>
                             <td>${listItem.getManufacturer_name()}</td>
                             <td>${listItem.getDescription()}</td>
-                            <td><a href="<c:url value='/automanufacturers?itemIDtoEdit=${listItem.getId()}'/>">Edit</a></td>
+                            <td>
+                                <a href="<c:url value='/automanufacturers?itemIDtoEdit=${listItem.getId()}'/>">Edit</a>&nbsp;/&nbsp;
+                                <a href="<c:url value='/automanufacturers?itemIDtoDelete=${listItem.getId()}'/>">Delete</a>
+                            </td>
                         </tr>
                     </c:forEach>
                 </table>

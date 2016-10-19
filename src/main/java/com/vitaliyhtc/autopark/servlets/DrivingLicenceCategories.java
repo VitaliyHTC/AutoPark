@@ -62,6 +62,8 @@ public class DrivingLicenceCategories extends HttpServlet {
         request.getSession().removeAttribute("itemTruckToEdit");
         request.getSession().removeAttribute("AddUpdSuccessful");
         request.getSession().removeAttribute("AddUpdFailed");
+        request.getSession().removeAttribute("DeleteSuccessful");
+        request.getSession().removeAttribute("DeleteFailed");
 
         request.getSession().removeAttribute("itemDriverToEdit");
         request.getSession().removeAttribute("dlcChecked");

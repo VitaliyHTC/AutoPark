@@ -32,9 +32,19 @@
             AutoPark : Список транспортних засобів автопарку
         </div>
         <div class="main-content">
-            <a href="home">На початкову сторінку.</a><br>
-
-            <h3>Список транспортних засобів автопарку</h3>
+            <a href="home">На початкову сторінку.</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="/drivers">Водії</a>&nbsp;&nbsp;&nbsp;
+            <a href="/automobiles">Автомобілі</a>&nbsp;&nbsp;&nbsp;
+            <a href="/automanufacturers">Список виробників авто</a>&nbsp;&nbsp;&nbsp;
+            <a href="/drivinglicencecategories"><i>Довідка:</i> Список категорій транспортних засобів</a>
+            <br>
+            <c:if test="${!empty DeleteSuccessful}">
+                <br><span class="Successful">${DeleteSuccessful}</span><br>
+            </c:if>
+            <c:if test="${!empty DeleteFailed}">
+                <br><span class="Failed">${DeleteFailed}</span><br>
+            </c:if>
+            <br>
             <% ArrayList<Truck> listTrucks =
                     (ArrayList<Truck>) session.getAttribute("listTrucks");
             %>
@@ -63,7 +73,10 @@
                                 VIN:&nbsp;${listItem.getVinNumber()}<br>
                                 ${listItem.getDescription()}
                             </td>
-                            <td><a href="<c:url value='/automobiles?itemIDtoEdit=${listItem.getId()}'/>">Edit</a></td>
+                            <td>
+                                <a href="<c:url value='/automobiles?itemIDtoEdit=${listItem.getId()}'/>">Edit</a><br>
+                                <a href="<c:url value='/automobiles?itemIDtoDelete=${listItem.getId()}'/>">Delete</a>
+                            </td>
                         </tr>
                     </c:forEach>
                 </table>

@@ -84,6 +84,66 @@ public class AutoMobiles extends HttpServlet {
         // Return selected item for editing;
 
         /*
+         * Deleting selected driver item itemIDtoDelete
+         */
+        String itemIDtoDelete = request.getParameter("itemIDtoDelete");
+        String DeleteSuccessful = null;
+        String DeleteFailed = null;
+        StringBuffer deleteFailedBuffer = new StringBuffer(256);
+        if(itemIDtoDelete!=null){
+            try {
+                int itemIDtoDeleteInt = Integer.parseInt(itemIDtoDelete);
+                PreparedStatement ps40 = null; // delete truck if no useges found
+                PreparedStatement ps41 = null; // get list of usages
+                ResultSet rs41 = null;
+                try{
+                    ps41 = con.prepareStatement(
+                        "select drivers.id, drivers.username from drivers, auto, driver_auto " +
+                                "where drivers.id=driver_auto.driver_id and driver_auto.auto_id=auto.id and auto.id=?");
+                    ps41.setInt(1, itemIDtoDeleteInt);
+                    rs41 = ps41.executeQuery();
+                    int count = 0;
+                    if(rs41!=null){
+                        deleteFailedBuffer.append("Deleting failed! This automobile are used by drivers with next ID&Usernames: ");
+                        while(rs41.next()){
+                            if(count>0){deleteFailedBuffer.append(", ");}
+                            deleteFailedBuffer.append(rs41.getInt("drivers.id"));
+                            deleteFailedBuffer.append(" ");
+                            deleteFailedBuffer.append(rs41.getString("drivers.username"));
+                            count++;
+                        }
+                        deleteFailedBuffer.append("; Cancel selection of automobile first, and then remove it.");
+                    }
+                    if(deleteFailedBuffer.length()>3 && count>0){
+                        DeleteFailed = deleteFailedBuffer.toString();
+                    }
+                    if(DeleteFailed==null){
+                        ps40 = con.prepareStatement("DELETE from auto where id=?");
+                        ps40.setInt(1, itemIDtoDeleteInt);
+                        ps40.execute();
+                        DeleteSuccessful = "Deleting successful!";
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    logger.error("Database connection problem");
+                    throw new ServletException("DB Connection problem.");
+                }finally{
+                    try {
+                        if(rs41!=null){rs41.close();}
+                        if(ps41!=null){ps41.close();}
+                        if(ps40!=null){ps40.close();}
+                    } catch (SQLException e) {
+                        logger.error("SQLException in closing PreparedStatement or ResultSet");
+                    }
+                }
+            }catch(NumberFormatException ex){
+                logger.info("Oooops! NumberFormatException in GET request parameter itemIDtoDelete: " + itemIDtoDelete);
+                errorItemIdToEdit="Getting item for edit failed. NumberFormatException.";
+            }
+        }
+        // Deleting driver item
+
+        /*
          * Generate listAM, listDLC for adding/editing section
          */
         PreparedStatement ps4 = null;
@@ -140,213 +200,273 @@ public class AutoMobiles extends HttpServlet {
          */
         String AddUpdSuccessful = null;
         StringBuffer errorMsgBuffer = new StringBuffer( 1024 );
-        if(request.getParameter("truck_id")!=null){
-            //validating parameters
-            int manufacturerID = Integer.parseInt(request.getParameter("manufacturerID"));
-            String manufacturerName=null;
-            String truckModel = request.getParameter("truckModel");
-            String engineModel = request.getParameter("engineModel");
-            int enginePower = Integer.parseInt(request.getParameter("enginePower"));
-            int engineEco = Integer.parseInt(request.getParameter("engineEco"));
-            String gearbox = request.getParameter("gearbox");
-            String chassisType = request.getParameter("chassisType");
-            int equippedWeight = Integer.parseInt(request.getParameter("equippedWeight"));
-            int maxWeight = Integer.parseInt(request.getParameter("maxWeight"));
-            int drivingLicenceCategoryID = Integer.parseInt(request.getParameter("drivingLicenceCategoryID"));
-            String drivingLicenceCategoryName=null;
-            String licencePlateNumber = request.getParameter("licencePlateNumber");
-            String vinNumber = request.getParameter("vinNumber");
-            String description = request.getParameter("description");
-            if(manufacturerID<1){
-                errorMsgBuffer.append("Please, select manufacturer of auto.<br>");
-                manufacturerName="";
-            }else{
-                for (AutoManufacturer autoManufacturer : listAM) {
-                    if(autoManufacturer.getId()==manufacturerID){
-                        manufacturerName = autoManufacturer.getManufacturer_name();
+        try{
+            if(request.getParameter("truck_id")!=null){
+                //validating parameters
+                int manufacturerID = Integer.parseInt(request.getParameter("manufacturerID"));
+                String manufacturerName=null;
+                String truckModel = request.getParameter("truckModel");
+                String engineModel = request.getParameter("engineModel");
+                int enginePower = Integer.parseInt(request.getParameter("enginePower"));
+                int engineEco = Integer.parseInt(request.getParameter("engineEco"));
+                String gearbox = request.getParameter("gearbox");
+                String chassisType = request.getParameter("chassisType");
+                int equippedWeight = Integer.parseInt(request.getParameter("equippedWeight"));
+                int maxWeight = Integer.parseInt(request.getParameter("maxWeight"));
+                int drivingLicenceCategoryID = Integer.parseInt(request.getParameter("drivingLicenceCategoryID"));
+                String drivingLicenceCategoryName=null;
+                String licencePlateNumber = request.getParameter("licencePlateNumber");
+                String vinNumber = request.getParameter("vinNumber");
+                String description = request.getParameter("description");
+                if(manufacturerID<1){
+                    errorMsgBuffer.append("Please, select manufacturer of auto.<br>");
+                    manufacturerName="";
+                }else{
+                    for (AutoManufacturer autoManufacturer : listAM) {
+                        if(autoManufacturer.getId()==manufacturerID){
+                            manufacturerName = autoManufacturer.getManufacturer_name();
+                        }
                     }
                 }
-            }
-            if(truckModel == null || truckModel.equals("") || truckModel.length()>64){
-                errorMsgBuffer.append("Auto model can't be null or empty or more than 64 symbols.<br>");
-            }
-            if(engineModel == null || engineModel.equals("") || engineModel.length()>64){
-                errorMsgBuffer.append("Engine model can't be null or empty or more than 64 symbols.<br>");
-            }
-            if(enginePower<10 || enginePower > 10000){
-                errorMsgBuffer.append("Engine power can't be less than 10HP or more than 10_000HP.<br>");
-            }
-            if(engineEco<1 || engineEco>7){
-                errorMsgBuffer.append("Engine eco can't be less than EURO1 or more than EURO7.<br>");
-            }
-            if(gearbox == null || gearbox.equals("") || gearbox.length()>64){
-                errorMsgBuffer.append("Gearbox can't be null or empty or more than 64 symbols.<br>");
-            }
-            if(chassisType == null || chassisType.equals("") || chassisType.length()>64){
-                errorMsgBuffer.append("Chassis type can't be null or empty or more than 64 symbols.<br>");
-            }
-            if(equippedWeight<100 || equippedWeight>400000){
-                errorMsgBuffer.append("Equipped weight can't be less than 100kg or more than 400_000kg.<br>");
-            }
-            if(maxWeight<100 || maxWeight>1000000){
-                errorMsgBuffer.append("Maximal weight can't be less than 100kg or more than 1_000_000kg");
-            }
-            if(drivingLicenceCategoryID<1 || drivingLicenceCategoryID >13){
-                errorMsgBuffer.append("Please, select driving licence category.<br>");
-                drivingLicenceCategoryName="";
-            }else{
-                for(DriverLicenceCategory driverLicenceCategory : listDLC){
-                    if(driverLicenceCategory.getId()==drivingLicenceCategoryID){
-                        drivingLicenceCategoryName = driverLicenceCategory.getCategory();
+                if(truckModel == null || truckModel.equals("") || truckModel.length()>64){
+                    errorMsgBuffer.append("Auto model can't be null or empty or more than 64 symbols.<br>");
+                }
+                if(engineModel == null || engineModel.equals("") || engineModel.length()>64){
+                    errorMsgBuffer.append("Engine model can't be null or empty or more than 64 symbols.<br>");
+                }
+                if(enginePower<10 || enginePower > 10000){
+                    errorMsgBuffer.append("Engine power can't be less than 10HP or more than 10_000HP.<br>");
+                }
+                if(engineEco<1 || engineEco>7){
+                    errorMsgBuffer.append("Engine eco can't be less than EURO1 or more than EURO7.<br>");
+                }
+                if(gearbox == null || gearbox.equals("") || gearbox.length()>64){
+                    errorMsgBuffer.append("Gearbox can't be null or empty or more than 64 symbols.<br>");
+                }
+                if(chassisType == null || chassisType.equals("") || chassisType.length()>64){
+                    errorMsgBuffer.append("Chassis type can't be null or empty or more than 64 symbols.<br>");
+                }
+                if(equippedWeight<100 || equippedWeight>400000){
+                    errorMsgBuffer.append("Equipped weight can't be less than 100kg or more than 400_000kg.<br>");
+                }
+                if(maxWeight<100 || maxWeight>1000000){
+                    errorMsgBuffer.append("Maximal weight can't be less than 100kg or more than 1_000_000kg");
+                }
+                if(drivingLicenceCategoryID<1 || drivingLicenceCategoryID >13){
+                    errorMsgBuffer.append("Please, select driving licence category.<br>");
+                    drivingLicenceCategoryName="";
+                }else{
+                    for(DriverLicenceCategory driverLicenceCategory : listDLC){
+                        if(driverLicenceCategory.getId()==drivingLicenceCategoryID){
+                            drivingLicenceCategoryName = driverLicenceCategory.getCategory();
+                        }
                     }
                 }
-            }
-            if(licencePlateNumber == null || licencePlateNumber.equals("") || licencePlateNumber.length()>32){
-                errorMsgBuffer.append("Licence plate number can't be null or empty or more than 32 symbols.<br>");
-            }
-            if(vinNumber == null || vinNumber.equals("") || vinNumber.length() > 32){
-                errorMsgBuffer.append("Vin number can't be null or empty or more than 32 symbols.<br>");
-            }
-            if(description == null || description.equals("") || description.length()>255){
-                errorMsgBuffer.append("Description can't be null or empty or more then 255 symbols.<br>");
-            }
-            if(errorMsgBuffer.length()>3){ // if errors found - return for editing
-                itemTruckToEdit = new Truck(
-                        Integer.parseInt(request.getParameter("truck_id")),
-                        manufacturerID,
-                        truckModel,
-                        vinNumber,
-                        drivingLicenceCategoryID,
-                        engineModel,
-                        enginePower,
-                        engineEco,
-                        gearbox,
-                        chassisType,
-                        maxWeight,
-                        equippedWeight,
-                        licencePlateNumber,
-                        description,
-                        manufacturerName,
-                        drivingLicenceCategoryName
-                );
-            }else{ // if no errors - INSERT or UPDATE
-                PreparedStatement ps2 = null;
-                PreparedStatement ps6 = null;
-                PreparedStatement ps7 = null;
-                ResultSet rs6 = null;
-                ResultSet rs7 = null;
-                try{
-                    int truck_id = Integer.parseInt(request.getParameter("truck_id"));
-                    if(truck_id == -1){ // INSERT new truck
-                        Boolean cancelAdding = false; // if duplication found - cancel adding.
-                        ps6 = con.prepareStatement("select id, vin_number from auto where vin_number=?");
-                        ps6.setString(1, vinNumber);
-                        rs6 = ps6.executeQuery();
-                        if(rs6!=null && rs6.next()){
-                            if(vinNumber.equals(rs6.getString("vin_number"))){
-                                errorMsgBuffer.append("Automobile with VIN: ");
-                                errorMsgBuffer.append(vinNumber);
-                                errorMsgBuffer.append(", already exists with ID: ");
-                                errorMsgBuffer.append(rs6.getInt("id"));
-                                errorMsgBuffer.append(". See in table by ID.<br>");
-                                cancelAdding=true;
+                if(licencePlateNumber == null || licencePlateNumber.equals("") || licencePlateNumber.length()>32){
+                    errorMsgBuffer.append("Licence plate number can't be null or empty or more than 32 symbols.<br>");
+                }
+                if(vinNumber == null || vinNumber.equals("") || vinNumber.length() > 32){
+                    errorMsgBuffer.append("Vin number can't be null or empty or more than 32 symbols.<br>");
+                }
+                if(description == null || description.equals("") || description.length()>255){
+                    errorMsgBuffer.append("Description can't be null or empty or more then 255 symbols.<br>");
+                }
+                if(errorMsgBuffer.length()>3){ // if errors found - return for editing
+                    itemTruckToEdit = new Truck(
+                            Integer.parseInt(request.getParameter("truck_id")),
+                            manufacturerID,
+                            truckModel,
+                            vinNumber,
+                            drivingLicenceCategoryID,
+                            engineModel,
+                            enginePower,
+                            engineEco,
+                            gearbox,
+                            chassisType,
+                            maxWeight,
+                            equippedWeight,
+                            licencePlateNumber,
+                            description,
+                            manufacturerName,
+                            drivingLicenceCategoryName
+                    );
+                }else{ // if no errors - INSERT or UPDATE
+                    PreparedStatement ps2 = null;
+                    PreparedStatement ps6 = null;
+                    PreparedStatement ps7 = null;
+                    ResultSet rs6 = null;
+                    ResultSet rs7 = null;
+                    try{
+                        int truck_id = Integer.parseInt(request.getParameter("truck_id"));
+                        if(truck_id == -1){ // INSERT new truck
+                            Boolean cancelAdding = false; // if duplication found - cancel adding.
+                            ps6 = con.prepareStatement("select id, vin_number from auto where vin_number=?");
+                            ps6.setString(1, vinNumber);
+                            rs6 = ps6.executeQuery();
+                            if(rs6!=null && rs6.next()){
+                                if(vinNumber.equals(rs6.getString("vin_number"))){
+                                    errorMsgBuffer.append("Automobile with VIN: ");
+                                    errorMsgBuffer.append(vinNumber);
+                                    errorMsgBuffer.append(", already exists with ID: ");
+                                    errorMsgBuffer.append(rs6.getInt("id"));
+                                    errorMsgBuffer.append(". See in table by ID.<br>");
+                                    cancelAdding=true;
+                                }
+                            }
+                            ps7 = con.prepareStatement("select id, license_plate_number from auto where license_plate_number=?");
+                            ps7.setString(1, licencePlateNumber);
+                            rs7 = ps7.executeQuery();
+                            if(rs7!=null && rs7.next()){
+                                if(licencePlateNumber.equals(rs7.getString("license_plate_number"))){
+                                    errorMsgBuffer.append("Automobile with licence plate number: ");
+                                    errorMsgBuffer.append(licencePlateNumber);
+                                    errorMsgBuffer.append(", already exists with ID: ");
+                                    errorMsgBuffer.append(rs7.getInt("id"));
+                                    errorMsgBuffer.append(". See in table by ID.<br>");
+                                    cancelAdding=true;
+                                }
+                            }
+                            if(cancelAdding){ // if duplicate found - return for editing
+                                itemTruckToEdit = new Truck(
+                                        Integer.parseInt(request.getParameter("truck_id")),
+                                        manufacturerID,
+                                        truckModel,
+                                        vinNumber,
+                                        drivingLicenceCategoryID,
+                                        engineModel,
+                                        enginePower,
+                                        engineEco,
+                                        gearbox,
+                                        chassisType,
+                                        maxWeight,
+                                        equippedWeight,
+                                        licencePlateNumber,
+                                        description,
+                                        manufacturerName,
+                                        drivingLicenceCategoryName
+                                );
+                                errorMsgBuffer.append("You can edit existing automobiles or add other.<br>");
+                            }
+                            if(!cancelAdding){
+                                ps2 = con.prepareStatement("INSERT INTO auto VALUES(null,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                                //INSERT INTO auto VALUES
+                                //(null, 1, 'R730LA6X4MNA', 'YS2R6X400C2078249', 11, 'V8 DC16', 730, 6,
+                                // 'Scania Opticruise 12+2','6x4 timber truck', 75000, 10000, 'BX6673BI', 'info');
+                                ps2.setInt(1, manufacturerID);
+                                ps2.setString(2, truckModel);
+                                ps2.setString(3, vinNumber);
+                                ps2.setInt(4, drivingLicenceCategoryID);
+                                ps2.setString(5, engineModel);
+                                ps2.setInt(6, enginePower);
+                                ps2.setInt(7, engineEco);
+                                ps2.setString(8, gearbox);
+                                ps2.setString(9, chassisType);
+                                ps2.setInt(10, maxWeight);
+                                ps2.setInt(11, equippedWeight);
+                                ps2.setString(12, licencePlateNumber);
+                                ps2.setString(13, description);
+                                ps2.execute();
+                                AddUpdSuccessful = "Successful!";
+                            }
+                        }else{ // UPDATE existing truck
+                            Boolean cancelAdding = false; // if duplication found - cancel adding.
+                            ps6 = con.prepareStatement("select id, vin_number from auto where vin_number=? and id!=?");
+                            ps6.setString(1, vinNumber);
+                            ps6.setInt(2, truck_id);
+                            rs6 = ps6.executeQuery();
+                            if(rs6!=null && rs6.next()){
+                                if(vinNumber.equals(rs6.getString("vin_number"))){
+                                    errorMsgBuffer.append("Automobile with VIN: ");
+                                    errorMsgBuffer.append(vinNumber);
+                                    errorMsgBuffer.append(", already exists with ID: ");
+                                    errorMsgBuffer.append(rs6.getInt("id"));
+                                    errorMsgBuffer.append(". See in table by ID.<br>");
+                                    errorMsgBuffer.append("You can't duplicate one vin number on many cars. Please correct data.<br>");
+                                    cancelAdding=true;
+                                }
+                            }
+                            ps7 = con.prepareStatement(
+                                    "select id, license_plate_number from auto where license_plate_number=? and id!=?");
+                            ps7.setString(1, licencePlateNumber);
+                            ps7.setInt(2, truck_id);
+                            rs7 = ps7.executeQuery();
+                            if(rs7!=null && rs7.next()){
+                                if(licencePlateNumber.equals(rs7.getString("license_plate_number"))){
+                                    errorMsgBuffer.append("Automobile with licence plate number: ");
+                                    errorMsgBuffer.append(licencePlateNumber);
+                                    errorMsgBuffer.append(", already exists with ID: ");
+                                    errorMsgBuffer.append(rs7.getInt("id"));
+                                    errorMsgBuffer.append(". See in table by ID.<br>");
+                                    errorMsgBuffer.append("You can't duplicate one licence plate number number on many cars. Please correct data.<br>");
+                                    cancelAdding=true;
+                                }
+                            }
+                            if(cancelAdding){ // if duplicate found - return for editing
+                                itemTruckToEdit = new Truck(
+                                        Integer.parseInt(request.getParameter("truck_id")),
+                                        manufacturerID,
+                                        truckModel,
+                                        vinNumber,
+                                        drivingLicenceCategoryID,
+                                        engineModel,
+                                        enginePower,
+                                        engineEco,
+                                        gearbox,
+                                        chassisType,
+                                        maxWeight,
+                                        equippedWeight,
+                                        licencePlateNumber,
+                                        description,
+                                        manufacturerName,
+                                        drivingLicenceCategoryName
+                                );
+                                errorMsgBuffer.append("You can edit existing automobiles or add other.<br>");
+                            }
+                            if(!cancelAdding){
+                                ps2 = con.prepareStatement("UPDATE auto SET " +
+                                        "manufacturer=?, model=?, vin_number=?, driving_licence_category=?, " +
+                                        "engine_model=?, engine_power=?, engine_eco=?, gearbox=?, chassis_type=?, " +
+                                        "max_weight=?, equipped_weight=?, license_plate_number=?, description=? " +
+                                        "WHERE id=?");
+                                ps2.setInt(1, manufacturerID);
+                                ps2.setString(2, truckModel);
+                                ps2.setString(3, vinNumber);
+                                ps2.setInt(4, drivingLicenceCategoryID);
+                                ps2.setString(5, engineModel);
+                                ps2.setInt(6, enginePower);
+                                ps2.setInt(7, engineEco);
+                                ps2.setString(8, gearbox);
+                                ps2.setString(9, chassisType);
+                                ps2.setInt(10, maxWeight);
+                                ps2.setInt(11, equippedWeight);
+                                ps2.setString(12, licencePlateNumber);
+                                ps2.setString(13, description);
+                                ps2.setInt(14, truck_id);
+                                ps2.execute();
+                                AddUpdSuccessful = "Successful";
                             }
                         }
-                        ps7 = con.prepareStatement("select id, license_plate_number from auto where license_plate_number=?");
-                        ps7.setString(1, licencePlateNumber);
-                        rs7 = ps7.executeQuery();
-                        if(rs7!=null && rs7.next()){
-                            if(licencePlateNumber.equals(rs7.getString("license_plate_number"))){
-                                errorMsgBuffer.append("Automobile with licence plate number: ");
-                                errorMsgBuffer.append(licencePlateNumber);
-                                errorMsgBuffer.append(", already exists with ID: ");
-                                errorMsgBuffer.append(rs7.getInt("id"));
-                                errorMsgBuffer.append(". See in table by ID.<br>");
-                                cancelAdding=true;
-                            }
-                        }
-                        if(cancelAdding){ // if duplicate found - return for editing
-                            itemTruckToEdit = new Truck(
-                                    Integer.parseInt(request.getParameter("truck_id")),
-                                    manufacturerID,
-                                    truckModel,
-                                    vinNumber,
-                                    drivingLicenceCategoryID,
-                                    engineModel,
-                                    enginePower,
-                                    engineEco,
-                                    gearbox,
-                                    chassisType,
-                                    maxWeight,
-                                    equippedWeight,
-                                    licencePlateNumber,
-                                    description,
-                                    manufacturerName,
-                                    drivingLicenceCategoryName
-                            );
-                            errorMsgBuffer.append("You can edit existing automobiles or add other.<br>");
-                        }
-                        if(!cancelAdding){
-                            ps2 = con.prepareStatement("INSERT INTO auto VALUES(null,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-                            //INSERT INTO auto VALUES
-                            //(null, 1, 'R730LA6X4MNA', 'YS2R6X400C2078249', 11, 'V8 DC16', 730, 6,
-                            // 'Scania Opticruise 12+2','6x4 timber truck', 75000, 10000, 'BX6673BI', 'info');
-                            ps2.setInt(1, manufacturerID);
-                            ps2.setString(2, truckModel);
-                            ps2.setString(3, vinNumber);
-                            ps2.setInt(4, drivingLicenceCategoryID);
-                            ps2.setString(5, engineModel);
-                            ps2.setInt(6, enginePower);
-                            ps2.setInt(7, engineEco);
-                            ps2.setString(8, gearbox);
-                            ps2.setString(9, chassisType);
-                            ps2.setInt(10, maxWeight);
-                            ps2.setInt(11, equippedWeight);
-                            ps2.setString(12, licencePlateNumber);
-                            ps2.setString(13, description);
-                            ps2.execute();
-                            AddUpdSuccessful = "Successful!";
-                        }
-                    }else{ // UPDATE existing truck
-                        ps2 = con.prepareStatement("UPDATE auto SET " +
-                                "manufacturer=?, model=?, vin_number=?, driving_licence_category=?, " +
-                                "engine_model=?, engine_power=?, engine_eco=?, gearbox=?, chassis_type=?, " +
-                                "max_weight=?, equipped_weight=?, license_plate_number=?, description=? " +
-                                "WHERE id=?");
-                        ps2.setInt(1, manufacturerID);
-                        ps2.setString(2, truckModel);
-                        ps2.setString(3, vinNumber);
-                        ps2.setInt(4, drivingLicenceCategoryID);
-                        ps2.setString(5, engineModel);
-                        ps2.setInt(6, enginePower);
-                        ps2.setInt(7, engineEco);
-                        ps2.setString(8, gearbox);
-                        ps2.setString(9, chassisType);
-                        ps2.setInt(10, maxWeight);
-                        ps2.setInt(11, equippedWeight);
-                        ps2.setString(12, licencePlateNumber);
-                        ps2.setString(13, description);
-                        ps2.setInt(14, truck_id);
-                        ps2.execute();
-                        AddUpdSuccessful = "Successful";
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    logger.error("Database connection problem");
-                    throw new ServletException("DB Connection problem.");
-                }finally{
-                    try {
-                        if(rs6!=null){rs6.close();}
-                        if(ps6!=null){ps6.close();}
-                        if(rs7!=null){rs7.close();}
-                        if(ps7!=null){ps7.close();}
-                        if(ps2!=null){ps2.close();}
                     } catch (SQLException e) {
-                        logger.error("SQLException in closing PreparedStatement or ResultSet");
+                        e.printStackTrace();
+                        logger.error("Database connection problem");
+                        throw new ServletException("DB Connection problem.");
+                    }finally{
+                        try {
+                            if(rs6!=null){rs6.close();}
+                            if(ps6!=null){ps6.close();}
+                            if(rs7!=null){rs7.close();}
+                            if(ps7!=null){ps7.close();}
+                            if(ps2!=null){ps2.close();}
+                        } catch (SQLException e) {
+                            logger.error("SQLException in closing PreparedStatement or ResultSet");
+                        }
                     }
                 }
+                // truck_id
             }
-            // truck_id
+        }catch(NumberFormatException ex){
+            logger.info("Oops! NumberFormatException in GET request parameter itemIDtoEdit: " + itemIdToEdit);
+            errorMsgBuffer.append("Oops! Looks like you trying to send empty inputs. Please, enter data before sending form.");
         }
         // Adding or updating item to auto table
 
@@ -429,6 +549,8 @@ public class AutoMobiles extends HttpServlet {
         request.getSession().removeAttribute("itemTruckToEdit");
         request.getSession().removeAttribute("AddUpdSuccessful");
         request.getSession().removeAttribute("AddUpdFailed");
+        request.getSession().removeAttribute("DeleteSuccessful");
+        request.getSession().removeAttribute("DeleteFailed");
 
         request.getSession().removeAttribute("itemDriverToEdit");
         request.getSession().removeAttribute("dlcChecked");
@@ -449,6 +571,12 @@ public class AutoMobiles extends HttpServlet {
         }
         if(errorMsgBuffer.length() > 3){
             request.getSession().setAttribute("AddUpdFailed", errorMsgBuffer.toString());
+        }
+        if(DeleteSuccessful!=null){
+            request.getSession().setAttribute("DeleteSuccessful", DeleteSuccessful);
+        }
+        if(DeleteFailed!=null){
+            request.getSession().setAttribute("DeleteFailed", DeleteFailed);
         }
         request.getSession().setAttribute("listDLC", listDLC);
         request.getSession().setAttribute("listAM", listAM);

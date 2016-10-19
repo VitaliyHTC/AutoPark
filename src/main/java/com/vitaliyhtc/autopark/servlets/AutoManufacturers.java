@@ -67,6 +67,65 @@ public class AutoManufacturers extends HttpServlet {
         // Return selected item for editing;
 
         /*
+         * Deleting selected driver item itemIDtoDelete
+         */
+        String itemIDtoDelete = request.getParameter("itemIDtoDelete");
+        String DeleteSuccessful = null;
+        String DeleteFailed = null;
+        StringBuffer deleteFailedBuffer = new StringBuffer(256);
+        if(itemIDtoDelete!=null){
+            try {
+                int itemIDtoDeleteInt = Integer.parseInt(itemIDtoDelete);
+                PreparedStatement ps40 = null; // delete truck if no useges found
+                PreparedStatement ps41 = null; // get list of usages
+                ResultSet rs41 = null;
+                try{
+                    ps41 = con.prepareStatement(
+                        "select auto.id from auto, auto_manufacturer where auto.manufacturer=auto_manufacturer.id " +
+                                    "and auto_manufacturer.id=?;");
+                    ps41.setInt(1, itemIDtoDeleteInt);
+                    rs41 = ps41.executeQuery();
+                    int count = 0;
+                    if(rs41!=null){
+                        deleteFailedBuffer.append("Deleting failed! This auto manufacturer are used by automobiles with next IDs: ");
+                        while(rs41.next()){
+                            if(count>0){deleteFailedBuffer.append(", ");}
+                            deleteFailedBuffer.append(rs41.getInt("auto.id"));
+                            count++;
+                        }
+                        deleteFailedBuffer.append("; If you like to remove this auto manufacturer, you need remove " +
+                                " automobiles first, and then remove it.");
+                    }
+                    if(deleteFailedBuffer.length()>3 && count>0){
+                        DeleteFailed = deleteFailedBuffer.toString();
+                    }
+                    if(DeleteFailed==null){
+                        ps40 = con.prepareStatement("DELETE from auto_manufacturer where id=?");
+                        ps40.setInt(1, itemIDtoDeleteInt);
+                        ps40.execute();
+                        DeleteSuccessful = "Deleting successful!";
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    logger.error("Database connection problem");
+                    throw new ServletException("DB Connection problem.");
+                }finally{
+                    try {
+                        if(rs41!=null){rs41.close();}
+                        if(ps41!=null){ps41.close();}
+                        if(ps40!=null){ps40.close();}
+                    } catch (SQLException e) {
+                        logger.error("SQLException in closing PreparedStatement or ResultSet");
+                    }
+                }
+            }catch(NumberFormatException ex){
+                logger.info("Oooops! NumberFormatException in GET request parameter itemIDtoDelete: " + itemIDtoDelete);
+                errorItemIdToEdit="Getting item for edit failed. NumberFormatException.";
+            }
+        }
+        // Deleting driver item
+
+        /*
          * Adding or updating item to auto_manufacturer table
          */
         String AddUpdSuccessful = null;
@@ -126,13 +185,36 @@ public class AutoManufacturers extends HttpServlet {
                             AddUpdSuccessful = "Successful!";
                         }
                     }else{
-                        ps2 = con.prepareStatement("UPDATE auto_manufacturer SET manufacturer_name=?, description=? WHERE id=?");
-                        //UPDATE auto_manufacturer SET manufacturer_name='?', description='?' WHERE id=?;
-                        ps2.setString(1, manufacturerNameUC);
-                        ps2.setString(2, manufacturer_description);
-                        ps2.setInt(3, manufacturer_id);
-                        ps2.execute();
-                        AddUpdSuccessful = "Successful!";
+                        Boolean cancelAdding = false; // if duplication found - cancel adding.
+                        ps3 = con.prepareStatement("select id, manufacturer_name from auto_manufacturer where manufacturer_name=?  and id!=? limit 1");
+                        ps3.setString(1, manufacturerNameUC);
+                        ps3.setInt(2, manufacturer_id);
+                        rs3 = ps3.executeQuery();
+                        if(rs3!=null && rs3.next()){
+                            if(manufacturerNameUC.equals(rs3.getString("manufacturer_name"))){
+                                errorMsgBuffer.append("Manufacturer with the same name: ");
+                                errorMsgBuffer.append(manufacturer_name);
+                                errorMsgBuffer.append(", already exists with ID: ");
+                                errorMsgBuffer.append(rs3.getInt("id"));
+                                errorMsgBuffer.append(". See in table by ID.");
+                                errorMsgBuffer.append("<br>You can't create the same manufacturer twice. Please correct data.");
+                                itemAMtoEdit = new AutoManufacturer(
+                                        Integer.parseInt(request.getParameter("manufacturer_id")),
+                                        manufacturer_name,
+                                        manufacturer_description
+                                );
+                                cancelAdding=true;
+                            }
+                        }
+                        if(!cancelAdding){
+                            ps2 = con.prepareStatement("UPDATE auto_manufacturer SET manufacturer_name=?, description=? WHERE id=?");
+                            //UPDATE auto_manufacturer SET manufacturer_name='?', description='?' WHERE id=?;
+                            ps2.setString(1, manufacturerNameUC);
+                            ps2.setString(2, manufacturer_description);
+                            ps2.setInt(3, manufacturer_id);
+                            ps2.execute();
+                            AddUpdSuccessful = "Successful!";
+                        }
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -198,6 +280,8 @@ public class AutoManufacturers extends HttpServlet {
         request.getSession().removeAttribute("itemTruckToEdit");
         request.getSession().removeAttribute("AddUpdSuccessful");
         request.getSession().removeAttribute("AddUpdFailed");
+        request.getSession().removeAttribute("DeleteSuccessful");
+        request.getSession().removeAttribute("DeleteFailed");
 
         request.getSession().removeAttribute("itemDriverToEdit");
         request.getSession().removeAttribute("dlcChecked");
@@ -217,6 +301,12 @@ public class AutoManufacturers extends HttpServlet {
         }
         if(errorMsgBuffer.length() > 3){
             request.getSession().setAttribute("AddUpdFailed", errorMsgBuffer.toString());
+        }
+        if(DeleteSuccessful!=null){
+            request.getSession().setAttribute("DeleteSuccessful", DeleteSuccessful);
+        }
+        if(DeleteFailed!=null){
+            request.getSession().setAttribute("DeleteFailed", DeleteFailed);
         }
         request.getSession().setAttribute("listAM", listAM);
         request.getRequestDispatcher("automanufacturers.jsp").forward(request, response);

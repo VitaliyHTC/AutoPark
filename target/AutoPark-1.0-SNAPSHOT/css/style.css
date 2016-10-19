@@ -84,3 +84,7 @@ table, td, tr, th {text-align: left;}
 table.truckList { table-layout: fixed; }
 
 form {line-height: 160%;}
+
+table.Zebra tr:nth-child(odd) {
+    background-color: #D7E3BC;
+}
