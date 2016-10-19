@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 public class LoginServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    static Logger logger = Logger.getLogger(LoginServlet.class);
+    private static Logger logger = Logger.getLogger(LoginServlet.class);
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String email = request.getParameter("email");

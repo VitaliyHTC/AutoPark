@@ -38,7 +38,7 @@
 
             <% HashMap<Integer, Driver> driversMap = (HashMap<Integer, Driver>) session.getAttribute("driversMap"); %>
             <c:if test="${!empty driversMap}">
-                <table class="tg">
+                <table class="w100">
                     <tr>
                         <th width="40">ID</th>
                         <th width="100%">Інформація про водія</th>
@@ -58,14 +58,14 @@
                                     <c:forEach items="${driver.value.getDriverCategoriesMap()}" var="drivingLicenceCategory">
                                         ${drivingLicenceCategory.value.getCategory()}&nbsp;
                                     </c:forEach>
-                                    </b><a href="<c:url value='/drivers?itemIDtoEditCategories=${driver.value.getId()}'/>">Змінити категорії</a><br>
+                                    </b>
                                 </c:if>
-                                <c:if test="${!empty driver.value.getDriverCategoriesMap()}">
-                                    <table class="tg">
+                                <c:if test="${!empty driver.value.getDriverTrucksMap()}">
+                                    <table class="truckList">
                                         <tr>
                                             <th width="40">ID</th>
-                                            <th width="100">Виробник</th>
-                                            <th width="120">Модель</th>
+                                            <th width="120">Виробник</th>
+                                            <th width="160">Модель</th>
                                             <th width="120">Номер</th>
                                         </tr>
                                         <c:forEach items="${driver.value.getDriverTrucksMap()}" var="truck">
@@ -77,16 +77,130 @@
                                             </tr>
                                         </c:forEach>
                                     </table>
-                                    <a href="<c:url value='/drivers?itemIDtoEditTrucks=${driver.value.getId()}'/>">Змінити список авто</a>
-                                    <hr>
                                 </c:if>
+                                <a href="<c:url value='/drivers?itemIDtoEditTrucks=${driver.value.getId()}'/>">Змінити список авто</a>
+                                <hr>
                             </td>
-                            <td><a href="<c:url value='/drivers?itemIDtoEdit=${driver.value.getId()}'/>">Edit</a></td>
+                            <td>
+                                <a href="<c:url value='/drivers?itemIDtoEdit=${driver.value.getId()}'/>">Edit</a><br>
+                                <a href="<c:url value='/drivers?itemIDtoDelete=${driver.value.getId()}'/>">Delete</a>
+                            </td>
                         </tr>
                     </c:forEach>
                 </table>
             </c:if>
 
+            <br>
+
+            <h3>Додавання/редагування водія</h3>
+            <c:if test="${!empty AddUpdSuccessful}">
+                <span class="Successful">${AddUpdSuccessful}</span><br><br>
+            </c:if>
+            <c:if test="${!empty AddUpdFailed}">
+                <span class="Failed">${AddUpdFailed}</span><br><br>
+            </c:if>
+
+            <c:choose>
+                <c:when test="${!empty itemDriverToEdit}">
+                    <!--edit driver and categories list-->
+                    Редагуєм водія.<br>
+                    <form action="drivers" method="post">
+                        ID:<br>
+                        <input type="hidden" name="driver_id" value="${itemDriverToEdit.getId()}">
+                        <input type="text" value="${itemDriverToEdit.getId()}" disabled><br>
+                        <br>
+                        Ім'я користувача:<br>
+                        <input type="text" name="username" value="${itemDriverToEdit.getUsername()}" maxlength="64"><br>
+                        Ім'я:<br>
+                        <input type="text" name="firstname" value="${itemDriverToEdit.getFirstname()}" maxlength="64"><br>
+                        Прізвище:<br>
+                        <input type="text" name="lastname" value="${itemDriverToEdit.getLastname()}" maxlength="64"><br>
+                        Номер телефону 1:<br>
+                        <input type="text" name="phone1" value="${itemDriverToEdit.getPhone1()}" maxlength="24"><br>
+                        Номер телефону 2:<br>
+                        <input type="text" name="phone2" value="${itemDriverToEdit.getPhone2()}" maxlength="24"><br>
+                        Номер телефону рідних:<br>
+                        <input type="text" name="phoneRelatives" value="${itemDriverToEdit.getPhoneRelatives()}" maxlength="24"><br>
+                        Адрес електронної пошти:<br>
+                        <input type="text" name="email" value="${itemDriverToEdit.getEmail()}" maxlength="255"><br>
+                        Категорії водія:<br>
+                        <c:forEach items="${listDLC}" var="listItem">
+                            <input type="checkbox" name="${listItem.getId()}_${listItem.getCategory()}"
+                            <c:if test="${dlcChecked.get(listItem.getId()-1)}"> checked </c:if>
+                            >${listItem.getCategory()}&nbsp;
+                        </c:forEach>
+                        <br>
+
+                        <input type="submit" value="Редагуєм!">
+                    </form>
+                    <a href="drivers">Не редагуєм.</a>
+                </c:when>
+                <c:when test="${!empty itemDriverForTrucksListEditing}">
+                    <!--edit driver trucks list-->
+                    Редагуєм список автомобілів водія.<br>
+                    <form action="drivers" method="post">
+                        Driver ID:<br>
+                        <input type="hidden" name="driverTrucks_id" value="${itemDriverForTrucksListEditing.getId()}">
+                        <input type="text" value="${itemDriverForTrucksListEditing.getId()}" disabled><br>
+                        <b>
+                        ${itemDriverForTrucksListEditing.getUsername()}&nbsp;&nbsp;&nbsp;
+                        ${itemDriverForTrucksListEditing.getFirstname()}&nbsp;
+                        ${itemDriverForTrucksListEditing.getLastname()}
+                        </b>
+                        <br>
+
+                        Список авто якими може керувати водій:<br>
+                        <c:forEach items="${listPossibleTrucks}" var="listItem">
+                            <input type="checkbox" name="truckID_${listItem.getId()}"
+                            <c:if test="${selectedTrucksSet.contains(listItem.getId())}"> checked </c:if>
+                            >&nbsp;
+                            ID=${listItem.getId()};&nbsp;&nbsp;&nbsp;
+                            ${listItem.getManufacturer()}&nbsp;
+                            ${listItem.getModel()}&nbsp;&nbsp;&nbsp;
+                            ${listItem.getLicencePlateNumber()}
+                            <br>
+                        </c:forEach>
+                        <br>
+
+                        <input type="submit" value="Редагуєм!">
+                    </form>
+                    <a href="drivers">Не редагуєм.</a>
+                </c:when>
+                <c:otherwise>
+                    <!--add driver with categories list-->
+                    Додаємо водія.<br>
+                    <form action="drivers" method="post">
+                        ID:<br>
+                            <input type="hidden" name="driver_id" value="-1">
+                        <input type="text" value="-1" disabled><br>
+                        <br>
+                        Ім'я користувача:<br>
+                            <input type="text" name="username" value="" maxlength="64"><br>
+                        Ім'я:<br>
+                            <input type="text" name="firstname" value="" maxlength="64"><br>
+                        Прізвище:<br>
+                            <input type="text" name="lastname" value="" maxlength="64"><br>
+                        Номер телефону 1:<br>
+                            <input type="text" name="phone1" value="" maxlength="24"><br>
+                        Номер телефону 2:<br>
+                            <input type="text" name="phone2" value="" maxlength="24"><br>
+                        Номер телефону рідних:<br>
+                            <input type="text" name="phoneRelatives" value="" maxlength="24"><br>
+                        Адрес електронної пошти:<br>
+                            <input type="text" name="email" value="" maxlength="255"><br>
+                        Категорії водія:<br>
+                        <c:forEach items="${listDLC}" var="listItem">
+                            <input type="checkbox" name="${listItem.getId()}_${listItem.getCategory()}">${listItem.getCategory()}&nbsp;
+                        </c:forEach>
+                        <br>
+
+                        <input type="submit" value="Додаємо.">
+                    </form>
+                </c:otherwise>
+            </c:choose>
+
+
+            <!-- end of main-content div-->
         </div>
     </div>
 </div>

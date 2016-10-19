@@ -20,7 +20,7 @@ import java.util.ArrayList;
 @WebServlet(name = "AutoMobiles")
 public class AutoMobiles extends HttpServlet {
 
-    static Logger logger = Logger.getLogger(DrivingLicenceCategories.class);
+    private static Logger logger = Logger.getLogger(DrivingLicenceCategories.class);
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -38,7 +38,10 @@ public class AutoMobiles extends HttpServlet {
                 PreparedStatement ps1 = null;
                 ResultSet rs1 = null;
                 try{
-                    ps1 = con.prepareStatement("select auto.*, auto_manufacturer.manufacturer_name, driving_licence_categories.licence_category from auto, auto_manufacturer, driving_licence_categories where auto.id=? and auto.manufacturer = auto_manufacturer.id and auto.driving_licence_category = driving_licence_categories.id limit 1");
+                    ps1 = con.prepareStatement(
+                        "select auto.*, auto_manufacturer.manufacturer_name, driving_licence_categories.licence_category " +
+                            "from auto, auto_manufacturer, driving_licence_categories where auto.id=? and " +
+                            "auto.manufacturer = auto_manufacturer.id and auto.driving_licence_category = driving_licence_categories.id limit 1");
                     ps1.setInt(1, itemIDtoEditInt);
                     rs1 = ps1.executeQuery();
                     if(rs1!=null && rs1.next()){
@@ -90,8 +93,8 @@ public class AutoMobiles extends HttpServlet {
         ArrayList<DriverLicenceCategory> listDLC = new ArrayList<DriverLicenceCategory>();
         ArrayList<AutoManufacturer> listAM = new ArrayList<AutoManufacturer>();
         try{
-            ps4 = con.prepareStatement("select id, licence_category from driving_licence_categories");
-            ps5 = con.prepareStatement("select id, manufacturer_name from auto_manufacturer");
+            ps4 = con.prepareStatement("select id, licence_category from driving_licence_categories order by id");
+            ps5 = con.prepareStatement("select id, manufacturer_name from auto_manufacturer order by id");
             // id, licence_category, category_description
             // id, manufacturer_name, description
             rs4 = ps4.executeQuery();
@@ -207,7 +210,7 @@ public class AutoMobiles extends HttpServlet {
             if(description == null || description.equals("") || description.length()>255){
                 errorMsgBuffer.append("Description can't be null or empty or more then 255 symbols.<br>");
             }
-            if(errorMsgBuffer.length()>3){
+            if(errorMsgBuffer.length()>3){ // if errors found - return for editing
                 itemTruckToEdit = new Truck(
                         Integer.parseInt(request.getParameter("truck_id")),
                         manufacturerID,
@@ -226,7 +229,7 @@ public class AutoMobiles extends HttpServlet {
                         manufacturerName,
                         drivingLicenceCategoryName
                 );
-            }else{
+            }else{ // if no errors - INSERT or UPDATE
                 PreparedStatement ps2 = null;
                 PreparedStatement ps6 = null;
                 PreparedStatement ps7 = null;
@@ -234,15 +237,18 @@ public class AutoMobiles extends HttpServlet {
                 ResultSet rs7 = null;
                 try{
                     int truck_id = Integer.parseInt(request.getParameter("truck_id"));
-                    if(truck_id == -1){
+                    if(truck_id == -1){ // INSERT new truck
                         Boolean cancelAdding = false; // if duplication found - cancel adding.
                         ps6 = con.prepareStatement("select id, vin_number from auto where vin_number=?");
                         ps6.setString(1, vinNumber);
                         rs6 = ps6.executeQuery();
                         if(rs6!=null && rs6.next()){
                             if(vinNumber.equals(rs6.getString("vin_number"))){
-                                errorMsgBuffer.append("Automobile with VIN: " + vinNumber +
-                                        ", already exists with ID: " + rs6.getInt("id") + ". See in table by ID.<br>");
+                                errorMsgBuffer.append("Automobile with VIN: ");
+                                errorMsgBuffer.append(vinNumber);
+                                errorMsgBuffer.append(", already exists with ID: ");
+                                errorMsgBuffer.append(rs6.getInt("id"));
+                                errorMsgBuffer.append(". See in table by ID.<br>");
                                 cancelAdding=true;
                             }
                         }
@@ -251,8 +257,11 @@ public class AutoMobiles extends HttpServlet {
                         rs7 = ps7.executeQuery();
                         if(rs7!=null && rs7.next()){
                             if(licencePlateNumber.equals(rs7.getString("license_plate_number"))){
-                                errorMsgBuffer.append("Automobile with licence plate number: " + licencePlateNumber +
-                                        ", already exists with ID: " + rs7.getInt("id") + ". See in table by ID.<br>");
+                                errorMsgBuffer.append("Automobile with licence plate number: ");
+                                errorMsgBuffer.append(licencePlateNumber);
+                                errorMsgBuffer.append(", already exists with ID: ");
+                                errorMsgBuffer.append(rs7.getInt("id"));
+                                errorMsgBuffer.append(". See in table by ID.<br>");
                                 cancelAdding=true;
                             }
                         }
@@ -298,7 +307,7 @@ public class AutoMobiles extends HttpServlet {
                             ps2.execute();
                             AddUpdSuccessful = "Successful!";
                         }
-                    }else{
+                    }else{ // UPDATE existing truck
                         ps2 = con.prepareStatement("UPDATE auto SET " +
                                 "manufacturer=?, model=?, vin_number=?, driving_licence_category=?, " +
                                 "engine_model=?, engine_power=?, engine_eco=?, gearbox=?, chassis_type=?, " +
@@ -365,7 +374,11 @@ public class AutoMobiles extends HttpServlet {
         ResultSet rs = null;
         ArrayList<Truck> listTrucks = new ArrayList<Truck>();
         try{
-            ps = con.prepareStatement("select auto.*, auto_manufacturer.manufacturer_name, driving_licence_categories.licence_category from auto, auto_manufacturer, driving_licence_categories where auto.manufacturer = auto_manufacturer.id and auto.driving_licence_category = driving_licence_categories.id");
+            ps = con.prepareStatement(
+            "select auto.*, auto_manufacturer.manufacturer_name, driving_licence_categories.licence_category " +
+                "from auto, auto_manufacturer, driving_licence_categories " +
+                "where auto.manufacturer = auto_manufacturer.id " +
+                    "and auto.driving_licence_category = driving_licence_categories.id");
             // see in database.sql
             rs = ps.executeQuery();
             if(rs!=null){
@@ -408,7 +421,6 @@ public class AutoMobiles extends HttpServlet {
         /*
          * Set attributes and follow to our jsp page (:
          */
-
         request.getSession().removeAttribute("listAM");
         request.getSession().removeAttribute("listDLC");
         request.getSession().removeAttribute("listTrucks");
@@ -417,6 +429,12 @@ public class AutoMobiles extends HttpServlet {
         request.getSession().removeAttribute("itemTruckToEdit");
         request.getSession().removeAttribute("AddUpdSuccessful");
         request.getSession().removeAttribute("AddUpdFailed");
+
+        request.getSession().removeAttribute("itemDriverToEdit");
+        request.getSession().removeAttribute("dlcChecked");
+        request.getSession().removeAttribute("listPossibleTrucks");
+        request.getSession().removeAttribute("selectedTrucksSet");
+        request.getSession().removeAttribute("itemDriverForTrucksListEditing");
 
         // Needed items: itemTruckToEdit, listAM, listDLC
         if(errorItemIdToEdit!=null){

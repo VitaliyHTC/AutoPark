@@ -39,7 +39,7 @@
                     (ArrayList<AutoManufacturer>) session.getAttribute("listAM");
             %>
             <c:if test="${!empty listAM}">
-                <table class="tg">
+                <table class="w100">
                     <tr>
                         <th width="40">ID</th>
                         <th width="120">Ім'я</th>
@@ -72,11 +72,11 @@
                 <c:when test="${!empty itemAMtoEdit}">
                     Редагування виробника.<br>
                     <form action="automanufacturers" method="post">
-                        <strong>ID</strong>:<br><input type="hidden" name="manufacturer_id" value ="${itemAMtoEdit.getId()}">
+                        ID:<br><input type="hidden" name="manufacturer_id" value ="${itemAMtoEdit.getId()}">
                             <input type="text" value="${itemAMtoEdit.getId()}" disabled><br>
-                        <strong>Ім'я</strong>:<br><input type="text" name="manufacturer_name" maxlength="64"
+                        Ім'я:<br><input type="text" name="manufacturer_name" maxlength="64"
                                                          value="${itemAMtoEdit.getManufacturer_name()}"><br>
-                        <strong>Опис</strong>:<br>
+                        Опис:<br>
                             <textarea name="manufacturer_description" maxlength="255" rows="7"
                                         cols="51">${itemAMtoEdit.getDescription()}</textarea><br>
                         <input type="submit" value="Редагуєм!">
@@ -87,10 +87,10 @@
                 <c:otherwise>
                     Додаємо автовиробника.<br>
                     <form action="automanufacturers" method="post">
-                        <strong>ID</strong>:<br><input type="hidden" name="manufacturer_id" value ="-1">
+                        ID:<br><input type="hidden" name="manufacturer_id" value ="-1">
                             <input type="text" value="-1" disabled><br>
-                        <strong>Ім'я</strong>:<br><input type="text" name="manufacturer_name" value="" maxlength="64"><br>
-                        <strong>Опис</strong>:<br>
+                        Ім'я:<br><input type="text" name="manufacturer_name" value="" maxlength="64"><br>
+                        Опис:<br>
                             <textarea name="manufacturer_description" maxlength="255" rows="7" cols="51"></textarea><br>
                         <input type="submit" value="Додаємо.">
                     </form>

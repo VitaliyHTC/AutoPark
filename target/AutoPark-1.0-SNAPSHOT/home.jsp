@@ -29,14 +29,14 @@
             AutoPark
         </div>
         <div class="main-content">
-            <% String  s1  = (String) session.getAttribute("attrTest"); %>
-            <%= s1 %>
             <br><br><br>
             В програмі є наступні таблиці:
             <ul>
                 <li><a href="/drivers">Водії</a></li>
                 <li><a href="/automobiles">Автомобілі</a></li>
+                <br>
                 <li><a href="/automanufacturers">Список виробників авто</a></li>
+                <br>
                 <li><a href="/drivinglicencecategories"><i>Довідка:</i> Список категорій транспортних засобів</a></li>
             </ul>
 

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 @WebServlet(name = "AutoManufacturers")
 public class AutoManufacturers extends HttpServlet {
 
-    static Logger logger = Logger.getLogger(DrivingLicenceCategories.class);
+    private static Logger logger = Logger.getLogger(DrivingLicenceCategories.class);
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -102,8 +102,11 @@ public class AutoManufacturers extends HttpServlet {
                         rs3 = ps3.executeQuery();
                         if(rs3!=null && rs3.next()){
                             if(manufacturerNameUC.equals(rs3.getString("manufacturer_name"))){
-                                errorMsgBuffer.append("Manufacturer with name: " + manufacturer_name +
-                                        ", already exists with ID: " + rs3.getInt("id") + ". See in table by ID.");
+                                errorMsgBuffer.append("Manufacturer with name: ");
+                                errorMsgBuffer.append(manufacturer_name);
+                                errorMsgBuffer.append(", already exists with ID: ");
+                                errorMsgBuffer.append(rs3.getInt("id"));
+                                errorMsgBuffer.append(". See in table by ID.");
                                 errorMsgBuffer.append("<br>You can edit existing manufacturers or add other.");
                                 itemAMtoEdit = new AutoManufacturer(
                                         Integer.parseInt(request.getParameter("manufacturer_id")),
@@ -195,6 +198,12 @@ public class AutoManufacturers extends HttpServlet {
         request.getSession().removeAttribute("itemTruckToEdit");
         request.getSession().removeAttribute("AddUpdSuccessful");
         request.getSession().removeAttribute("AddUpdFailed");
+
+        request.getSession().removeAttribute("itemDriverToEdit");
+        request.getSession().removeAttribute("dlcChecked");
+        request.getSession().removeAttribute("listPossibleTrucks");
+        request.getSession().removeAttribute("selectedTrucksSet");
+        request.getSession().removeAttribute("itemDriverForTrucksListEditing");
 
         if(errorItemIdToEdit!=null){
             errorMsgBuffer.append(errorItemIdToEdit);

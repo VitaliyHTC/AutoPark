@@ -50,7 +50,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>Index</servlet-name>
-        <url-pattern>/Index</url-pattern>
+        <url-pattern>/index</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -102,6 +102,7 @@
     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- errors handling ~~~~~~~~~~~~~~~~~~ -->
     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
     <error-page>
         <error-code>404</error-code>
         <location>/AppErrorHandler</location>
@@ -110,6 +111,7 @@
         <exception-type>java.lang.Throwable</exception-type>
         <location>/AppErrorHandler</location>
     </error-page>
+
 
     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 

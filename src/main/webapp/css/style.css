@@ -56,7 +56,7 @@ div.LoginForm form input, div.RegisterForm form input {
 }
 
 div.UserAccountOptionsOuter {
-    min-width: 300px; max-width: 1240px; width: 100%; margin: 0 auto; padding: 8px;
+    min-width: 400px; max-width: 1240px; width: 100%; margin: 0 auto; padding: 8px;
     -webkit-box-sizing: border-box;  -moz-box-sizing: border-box;
     box-sizing: border-box;
     overflow: auto;
@@ -73,11 +73,14 @@ div.UserLogoutForm { float:right; }
 
 
 div.all-wrap {
-    min-width:300px;max-width:1240px;width:100%; margin: 16pt auto;
+    min-width:400px;max-width:1240px;width:100%; margin: 16pt auto;
 }
 
 span.Successful { color:green; }
 span.Failed { color:red; }
-table {width:100%;}
+table.w100 {width:100%;}
 th {color:#888888;}
 table, td, tr, th {text-align: left;}
+table.truckList { table-layout: fixed; }
+
+form {line-height: 160%;}

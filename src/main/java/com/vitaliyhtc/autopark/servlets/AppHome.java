@@ -11,8 +11,6 @@ import java.io.IOException;
 public class AppHome extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        request.getSession().setAttribute("attrTest", "attrTestContent");
         request.getRequestDispatcher("home.jsp").forward(request, response);
     }
 

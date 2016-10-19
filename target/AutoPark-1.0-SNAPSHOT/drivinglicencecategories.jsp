@@ -39,7 +39,7 @@
                     (ArrayList<DriverLicenceCategory>) session.getAttribute("listDLC");
             %>
             <c:if test="${!empty listDLC}">
-                <table class="tg">
+                <table class="w100">
                     <tr>
                         <th width="40">ID</th>
                         <th width="60">Категорія</th>

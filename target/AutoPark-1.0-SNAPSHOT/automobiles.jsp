@@ -39,7 +39,7 @@
                     (ArrayList<Truck>) session.getAttribute("listTrucks");
             %>
             <c:if test="${!empty listTrucks}">
-                <table class="tg">
+                <table class="w100">
                     <tr>
                         <th width="40">ID</th>
                         <th width="100%">Інформація про авто</th>
@@ -84,10 +84,10 @@
                 <c:when test="${!empty itemTruckToEdit}">
                     Редагування автомобіля.<br>
                     <form action="automobiles" method="post">
-                        <strong>ID</strong>:<br><input type="hidden" name="truck_id" value ="${itemTruckToEdit.getId()}">
+                        ID:<br><input type="hidden" name="truck_id" value ="${itemTruckToEdit.getId()}">
                         <input type="text" value="${itemTruckToEdit.getId()}" disabled><br>
                         <br>
-                        <strong>Ім'я</strong>:<br>
+                        Ім'я:<br>
                         <c:forEach items="${listAM}" var="listItem">
                             <input type="radio" name="manufacturerID" value="${listItem.getId()}"
                             <c:if test="${itemTruckToEdit.getManufacturerID()==listItem.getId()}">
@@ -96,23 +96,23 @@
                             >${listItem.getManufacturer_name()}&nbsp;
                         </c:forEach>
                         <br>
-                        <strong>Модель авто</strong>:<br>
+                        Модель авто:<br>
                             <input type="text" name="truckModel" value="${itemTruckToEdit.getModel()}" maxlength="64"><br>
-                        <strong>Модель двигуна</strong>:<br>
+                        Модель двигуна:<br>
                             <input type="text" name="engineModel" value="${itemTruckToEdit.getEngineModel()}" maxlength="64"><br>
-                        <strong>Потужність двигуна HP</strong>:<br>
+                        Потужність двигуна HP:<br>
                             <input type="number" name="enginePower" value="${itemTruckToEdit.getEnginePower()}" min="10" max="10000"><br>
-                        <strong>Екологічний клас двигуна EURO_</strong>:<br>
+                        Екологічний клас двигуна EURO_:<br>
                             <input type="number" name="engineEco" value="${itemTruckToEdit.getEngineEco()}" min="1" max="7"><br>
-                        <strong>Коробка передач</strong>:<br>
+                        Коробка передач:<br>
                             <input type="text" name="gearbox" value="${itemTruckToEdit.getGearbox()}" maxlength="64"><br>
-                        <strong>Тип шассі, колісна формула</strong>:<br>
+                        Тип шассі, колісна формула:<br>
                             <input type="text" name="chassisType" value="${itemTruckToEdit.getChassisType()}" maxlength="64"><br>
-                        <strong>Масса авто в спорядженому стані кг</strong>:<br>
+                        Масса авто в спорядженому стані кг:<br>
                             <input type="number" name="equippedWeight" value="${itemTruckToEdit.getEquippedWeight()}" min="100" max="400000"><br>
-                        <strong>Максимальна технічна масса авто кг</strong>:<br>
+                        Максимальна технічна масса авто кг:<br>
                             <input type="number" name="maxWeight" value="${itemTruckToEdit.getMaxWeight()}" min="100" max="1000000"><br>
-                        <strong>Необхідна категорія водійських прав</strong>:<br>
+                        Необхідна категорія водійських прав:<br>
                         <c:forEach items="${listDLC}" var="listItem">
                             <input type="radio" name="drivingLicenceCategoryID" value="${listItem.getId()}"
                             <c:if test="${itemTruckToEdit.getDrivingLicenceCategoryID()==listItem.getId()}">
@@ -121,11 +121,11 @@
                             >${listItem.getCategory()}&nbsp;
                         </c:forEach>
                         <br>
-                        <strong>Номерний знак авто:</strong>:<br>
+                        Номерний знак авто::<br>
                             <input type="text" name="licencePlateNumber" value="${itemTruckToEdit.getLicencePlateNumber()}" maxlength="32"><br>
-                        <strong>VIN:</strong>:<br>
+                        VIN::<br>
                         <input type="text" name="vinNumber" value="${itemTruckToEdit.getVinNumber()}" maxlength="32"><br>
-                            <strong>Опис авто:</strong>:<br>
+                            Опис авто::<br>
                         <textarea name="description" maxlength="255" rows="7" cols="51">${itemTruckToEdit.getDescription()}</textarea><br>
 
                         <input type="submit" value="Редагуєм!">
@@ -135,40 +135,40 @@
                 <c:otherwise>
                     Додаємо автомобіль.<br>
                     <form action="automobiles" method="post">
-                        <strong>ID</strong>:<br><input type="hidden" name="truck_id" value ="-1">
+                        ID:<br><input type="hidden" name="truck_id" value ="-1">
                         <input type="text" value="-1" disabled><br>
                         <br>
-                        <strong>Ім'я</strong>:<br>
+                        Ім'я:<br>
                         <c:forEach items="${listAM}" var="listItem">
                             <input type="radio" name="manufacturerID" value="${listItem.getId()}">${listItem.getManufacturer_name()}&nbsp;
                         </c:forEach>
                         <br>
-                        <strong>Модель авто</strong>:<br>
+                        Модель авто:<br>
                             <input type="text" name="truckModel" value="" maxlength="64"><br>
-                        <strong>Модель двигуна</strong>:<br>
+                        Модель двигуна:<br>
                             <input type="text" name="engineModel" value="" maxlength="64"><br>
-                        <strong>Потужність двигуна HP</strong>:<br>
+                        Потужність двигуна HP:<br>
                             <input type="number" name="enginePower" value="" min="10" max="10000"><br>
-                        <strong>Екологічний клас двигуна EURO_</strong>:<br>
+                        Екологічний клас двигуна EURO_:<br>
                             <input type="number" name="engineEco" value="" min="1" max="7"><br>
-                        <strong>Коробка передач</strong>:<br>
+                        Коробка передач:<br>
                             <input type="text" name="gearbox" value="" maxlength="64"><br>
-                        <strong>Тип шассі, колісна формула</strong>:<br>
+                        Тип шассі, колісна формула:<br>
                             <input type="text" name="chassisType" value="" maxlength="64"><br>
-                        <strong>Масса авто в спорядженому стані кг</strong>:<br>
+                        Масса авто в спорядженому стані кг:<br>
                             <input type="number" name="equippedWeight" value="" min="100" max="400000"><br>
-                        <strong>Максимальна технічна масса авто кг</strong>:<br>
+                        Максимальна технічна масса авто кг:<br>
                             <input type="number" name="maxWeight" value="" min="100" max="1000000"><br>
-                        <strong>Необхідна категорія водійських прав</strong>:<br>
+                        Необхідна категорія водійських прав:<br>
                         <c:forEach items="${listDLC}" var="listItem">
                             <input type="radio" name="drivingLicenceCategoryID" value="${listItem.getId()}">${listItem.getCategory()}&nbsp;
                         </c:forEach>
                         <br>
-                        <strong>Номерний знак авто:</strong>:<br>
+                        Номерний знак авто::<br>
                             <input type="text" name="licencePlateNumber" value="" maxlength="32"><br>
-                        <strong>VIN:</strong>:<br>
+                        VIN::<br>
                             <input type="text" name="vinNumber" value="" maxlength="32"><br>
-                        <strong>Опис авто:</strong>:<br>
+                        Опис авто::<br>
                             <textarea name="description" maxlength="255" rows="7" cols="51"></textarea><br>
 
                         <input type="submit" value="Додаємо.">

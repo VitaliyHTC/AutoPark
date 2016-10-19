@@ -18,7 +18,7 @@ import java.util.ArrayList;
 @WebServlet(name = "DrivingLicenceCategories")
 public class DrivingLicenceCategories extends HttpServlet {
 
-    static Logger logger = Logger.getLogger(DrivingLicenceCategories.class);
+    private static Logger logger = Logger.getLogger(DrivingLicenceCategories.class);
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -27,7 +27,7 @@ public class DrivingLicenceCategories extends HttpServlet {
         ResultSet rs = null;
         ArrayList<DriverLicenceCategory> listDLC = new ArrayList<DriverLicenceCategory>();
         try{
-            ps = con.prepareStatement("select * from driving_licence_categories");
+            ps = con.prepareStatement("select * from driving_licence_categories order by id");
             // id, licence_category, category_description
             rs = ps.executeQuery();
             if(rs != null){
@@ -62,6 +62,12 @@ public class DrivingLicenceCategories extends HttpServlet {
         request.getSession().removeAttribute("itemTruckToEdit");
         request.getSession().removeAttribute("AddUpdSuccessful");
         request.getSession().removeAttribute("AddUpdFailed");
+
+        request.getSession().removeAttribute("itemDriverToEdit");
+        request.getSession().removeAttribute("dlcChecked");
+        request.getSession().removeAttribute("listPossibleTrucks");
+        request.getSession().removeAttribute("selectedTrucksSet");
+        request.getSession().removeAttribute("itemDriverForTrucksListEditing");
 
 
         request.getSession().setAttribute("listDLC", listDLC);
